@@ -136,20 +136,17 @@ async function generateAllAddressDetails(key, isImporting = false) {
     return result;
 }
 
-// Updated main function for Vercel
 module.exports = async (req, res) => {
-    // Assuming you're receiving JSON data
     try {
         if(req.method === 'POST') {
             const { key, isImporting } = req.body;
             const details = await generateAllAddressDetails(key, isImporting);
             res.status(200).send(details);
         } else {
-            // Handle non-POST requests
             res.status(405).send({ error: 'Method Not Allowed' });
         }
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        console.error('Detailed Error:', error);
+        res.status(500).send({ error: 'Internal Server Error', details: error.message });
     }
 };
