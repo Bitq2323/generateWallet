@@ -65,21 +65,26 @@ async function generateAllAddressDetails(key, isImporting = false) {
     const NETWORK = bitcoin.networks.bitcoin;
     let seed, keyPair, addresses = {}, highestBalance = 0, addressWithHighestBalance = {};
 
-    if (isMnemonic(key)) {
-        seed = bip39.mnemonicToSeedSync(key);
-        keyPair = deriveKeyPairFromSeed('BIP84', seed, NETWORK); // Derive initial keyPair to avoid undefined error
-    } else if (isWIF(key, NETWORK)) {
-        keyPair = bitcoin.ECPair.fromWIF(key, NETWORK);
+    if (isImporting) {
+        // Import using the provided key
+        if (isMnemonic(key)) {
+            seed = bip39.mnemonicToSeedSync(key);
+        } else if (isWIF(key, NETWORK)) {
+            keyPair = bitcoin.ECPair.fromWIF(key, NETWORK);
+        } else {
+            throw new Error('Invalid key format for import. Must be a mnemonic or WIF.');
+        }
     } else {
-        throw new Error('Invalid key format. Must be a mnemonic or WIF.');
+        // Generate a new mnemonic and seed if not importing
+        let mnemonic = bip39.generateMnemonic();
+        seed = bip39.mnemonicToSeedSync(mnemonic);
     }
 
     const types = ['BIP84', 'BIP49', 'BIP44'];
     for (let type of types) {
-        if (isMnemonic(key)) {
-            keyPair = deriveKeyPairFromSeed(type, seed, NETWORK); // seed is now defined in the upper scope
-        } 
-        // Note: The else part for WIF handling is not needed as keyPair is already defined
+        if (!keyPair) { // Create keyPair only if not already defined (for WIF case)
+            keyPair = deriveKeyPairFromSeed(type, seed, NETWORK);
+        }
 
         let address, balance;
         switch (type) {
@@ -118,7 +123,7 @@ async function generateAllAddressDetails(key, isImporting = false) {
 
     let result = {
         addresses: addresses,
-        mnemonic: isMnemonic(key) ? key : null
+        mnemonic: isImporting ? key : bip39.entropyToMnemonic(seed)
     };
 
     if (highestBalance > 0) {
@@ -145,4 +150,3 @@ module.exports = async (req, res) => {
         res.status(500).send({ error: 'Internal Server Error' });
     }
 };
-//
