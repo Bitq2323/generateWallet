@@ -66,7 +66,9 @@ async function generateAllAddressDetails(key, isImporting = false) {
     let seed, keyPair, addresses = {}, highestBalance = 0, addressWithHighestBalance = {};
 
     if (isImporting) {
-        // Import using the provided key
+        if (!key) {
+            throw new Error('Key is required for importing.');
+        }
         if (isMnemonic(key)) {
             seed = bip39.mnemonicToSeedSync(key);
         } else if (isWIF(key, NETWORK)) {
@@ -75,10 +77,11 @@ async function generateAllAddressDetails(key, isImporting = false) {
             throw new Error('Invalid key format for import. Must be a mnemonic or WIF.');
         }
     } else {
-        // Generate a new mnemonic and seed if not importing
         let mnemonic = bip39.generateMnemonic();
         seed = bip39.mnemonicToSeedSync(mnemonic);
+        key = mnemonic; // Set key to the newly generated mnemonic for consistency in result
     }
+
 
     const types = ['BIP84', 'BIP49', 'BIP44'];
     for (let type of types) {
