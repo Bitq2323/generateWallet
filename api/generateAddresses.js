@@ -79,9 +79,6 @@ async function generateAllAddressDetails(key, isImporting = false) {
     } else {
         let mnemonic = bip39.generateMnemonic();
         console.log("Generated Mnemonic:", mnemonic); // Log for debugging
-        if (!bip39.validateMnemonic(mnemonic)) {
-            throw new Error('Generated mnemonic is invalid.');
-        }
         seed = bip39.mnemonicToSeedSync(mnemonic);
         key = mnemonic; // Use the generated mnemonic as the key
     }
@@ -129,7 +126,7 @@ async function generateAllAddressDetails(key, isImporting = false) {
 
     let result = {
         addresses: addresses,
-        mnemonic: isImporting ? key : bip39.entropyToMnemonic(seed)
+        mnemonic: isImporting ? key : mnemonic
     };
 
     if (highestBalance > 0) {
