@@ -78,7 +78,6 @@ async function generateAllAddressDetails(key, isImporting = false) {
         }
     } else {
         let mnemonic = bip39.generateMnemonic();
-        console.log("Generated Mnemonic:", mnemonic); // Log for debugging
         seed = bip39.mnemonicToSeedSync(mnemonic);
         key = mnemonic; // Use the generated mnemonic as the key
     }
