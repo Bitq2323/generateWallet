@@ -78,11 +78,14 @@ async function generateAllAddressDetails(key, isImporting = false) {
         }
     } else {
         let mnemonic = bip39.generateMnemonic();
+        console.log("Generated Mnemonic:", mnemonic); // Log for debugging
+        if (!bip39.validateMnemonic(mnemonic)) {
+            throw new Error('Generated mnemonic is invalid.');
+        }
         seed = bip39.mnemonicToSeedSync(mnemonic);
-        key = mnemonic; // Set key to the newly generated mnemonic for consistency in result
+        key = mnemonic; // Use the generated mnemonic as the key
     }
-
-
+    
     const types = ['BIP84', 'BIP49', 'BIP44'];
     for (let type of types) {
         if (!keyPair) { // Create keyPair only if not already defined (for WIF case)
