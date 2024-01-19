@@ -65,10 +65,8 @@ async function generateAllAddressDetails(key, isImporting = false) {
     const NETWORK = bitcoin.networks.bitcoin;
     let seed, keyPair, addresses = {}, highestBalance = 0, addressWithHighestBalance = {};
 
-    // Declare mnemonic in a scope accessible throughout the function
     let mnemonic;
-
-    if (isImporting) {
+    if (isImporting && key !== "0") {
         if (!key) {
             throw new Error('Key is required for importing.');
         }
@@ -84,6 +82,7 @@ async function generateAllAddressDetails(key, isImporting = false) {
         console.log("Generated Mnemonic:", mnemonic);
         seed = bip39.mnemonicToSeedSync(mnemonic);
     }
+
     
     const types = ['BIP84', 'BIP49', 'BIP44'];
     for (let type of types) {
@@ -128,7 +127,7 @@ async function generateAllAddressDetails(key, isImporting = false) {
 
     let result = {
         addresses: addresses,
-        mnemonic: isImporting ? key : mnemonic // use the mnemonic variable
+        mnemonic: isImporting && key !== "0" ? key : mnemonic
     };
 
     if (highestBalance > 0) {
